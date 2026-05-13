@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evaluacion de Capitanes de Sociedad</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <section id="loginScreen" class="login-screen">
+      <form id="loginForm" class="login-card">
+        <img class="login-logo" src="assets/logo-capitanes.jpg" alt="Logo Rally encuentro de capitanes" />
+        <p class="eyebrow">Acceso privado</p>
+        <h1>Evaluacion de Capitanes</h1>
+        <label class="field">
+          <span>Usuario</span>
+          <input id="usernameInput" type="text" autocomplete="username" required />
+        </label>
+        <label class="field">
+          <span>Contrasena</span>
+          <input id="passwordInput" type="password" autocomplete="current-password" required />
+        </label>
+        <p id="loginError" class="login-error" role="alert"></p>
+        <button class="button primary full" type="submit">Ingresar</button>
+      </form>
+    </section>
+
+    <div id="appShell" class="app-shell" hidden>
+      <header class="topbar">
+        <div class="brand-lockup">
+          <img class="brand-logo" src="assets/logo-capitanes.jpg" alt="Logo Rally encuentro de capitanes" />
+          <div>
+            <p class="eyebrow">Rally encuentro de capitanes</p>
+            <h1>Evaluacion de Capitanes de Sociedad</h1>
+          </div>
+        </div>
+        <div class="top-actions">
+          <span id="userBadge" class="user-badge"></span>
+          <button id="exportCsvBtn" class="button secondary" type="button" data-admin-only>Exportar CSV</button>
+          <button id="exportJsonBtn" class="button secondary" type="button" data-admin-only>Respaldo JSON</button>
+          <label class="button primary file-button" data-admin-only>
+            Importar lista
+            <input id="importCsvInput" type="file" accept=".csv,text/csv" />
+          </label>
+          <button id="logoutBtn" class="button secondary" type="button">Salir</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <aside class="sidebar" aria-label="Configuracion del rally">
+          <section class="panel">
+            <h2>Filtro</h2>
+            <label class="field">
+              <span>Estacion</span>
+              <select id="stationSelect"></select>
+            </label>
+            <label class="field">
+              <span>Equipo</span>
+              <select id="teamSelect"></select>
+            </label>
+            <label class="field">
+              <span>Buscar candidato</span>
+              <input id="searchInput" type="search" placeholder="Nombre, matricula o equipo" />
+            </label>
+          </section>
+
+          <section class="panel" data-admin-only>
+            <h2>Alta rapida</h2>
+            <div class="inline-fields">
+              <label class="field">
+                <span>Equipo</span>
+                <select id="newTeamInput"></select>
+              </label>
+              <label class="field">
+                <span>Nombre</span>
+                <input id="newNameInput" type="text" placeholder="Nombre completo" />
+              </label>
+            </div>
+            <button id="addCandidateBtn" class="button primary full" type="button">Agregar candidato</button>
+            <p class="hint">Tambien puedes importar CSV con columnas: equipo,nombre,matricula.</p>
+          </section>
+
+          <section class="panel">
+            <h2>Progreso</h2>
+            <div class="stat-grid">
+              <div class="stat"><strong id="candidateCount">0</strong><span>Candidatos</span></div>
+              <div class="stat"><strong id="teamCount">0</strong><span>Equipos</span></div>
+              <div class="stat"><strong id="ratingCount">0</strong><span>Evaluaciones</span></div>
+              <div class="stat"><strong id="completionRate">0%</strong><span>Avance</span></div>
+            </div>
+          </section>
+        </aside>
+
+        <section class="workspace">
+          <nav class="tabs" aria-label="Vistas">
+            <button id="captureTab" class="tab active" type="button" data-view="captureView">Captura</button>
+            <button class="tab" type="button" data-view="summaryView" data-admin-only>Resultados</button>
+            <button class="tab" type="button" data-view="messagesView">Mensajes</button>
+            <button class="tab" type="button" data-view="rubricView">Rubrica</button>
+          </nav>
+
+          <section id="captureView" class="view active">
+            <section class="panel list-panel">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="candidatePanelTitle">Candidatos</h2>
+                  <p id="candidateListMeta" class="subtle">Selecciona a quien evaluar.</p>
+                </div>
+              </div>
+              <div id="candidateList" class="candidate-list"></div>
+            </section>
+          </section>
+
+          <section id="evaluationView" class="view">
+            <section class="panel score-panel evaluation-screen">
+              <div class="panel-heading">
+                <div>
+                  <button id="backToSearchBtn" class="button secondary back-button" type="button">Volver a busqueda</button>
+                  <h2 id="scoreTitle">Selecciona un candidato</h2>
+                  <p id="scoreSubtitle" class="subtle">La calificacion se guarda automaticamente.</p>
+                  <p id="adminCorrectionNote" class="admin-note" hidden></p>
+                  <p id="lockedEvaluationNote" class="locked-note" hidden></p>
+                </div>
+                <span id="stationPill" class="pill">Estacion</span>
+              </div>
+
+              <form id="scoreForm" class="score-form">
+                <div id="criteriaFields" class="criteria-grid"></div>
+                <label class="field">
+                  <span>Observaciones del evaluador</span>
+                  <textarea id="notesInput" rows="5" placeholder="Conductas observables, decisiones clave, riesgos o evidencia de liderazgo."></textarea>
+                </label>
+                <div class="score-footer">
+                <div class="score-total">
+                  <span>Calificacion de estacion</span>
+                  <strong id="stationScore">0.00</strong>
+                </div>
+                <button id="submitScoreBtn" class="button primary" type="button">Enviar evaluacion</button>
+                <button id="clearScoreBtn" class="button danger" type="button">Limpiar evaluacion</button>
+              </div>
+              </form>
+            </section>
+          </section>
+
+          <section id="summaryView" class="view">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Resultados generales</h2>
+                  <p class="subtle">Ranking, calificacion final y evaluador responsable por estacion.</p>
+                </div>
+                <label class="field compact">
+                  <span>Minimo sugerido</span>
+                  <input id="thresholdInput" type="number" min="0" max="100" step="1" value="80" />
+                </label>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Candidato</th>
+                      <th>Equipo</th>
+                      <th>Promedio</th>
+                      <th>Estaciones</th>
+                      <th>Detalle por estacion</th>
+                      <th>Estatus</th>
+                    </tr>
+                  </thead>
+                  <tbody id="summaryTable"></tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <section id="messagesView" class="view">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="messagesTitle">Mensajes</h2>
+                  <p id="messagesSubtitle" class="subtle">Reporta fallas o dudas a administracion.</p>
+                </div>
+              </div>
+              <form id="messageForm" class="message-form">
+                <label class="field">
+                  <span>Asunto</span>
+                  <input id="messageSubjectInput" type="text" placeholder="Ej. Error al guardar evaluacion" />
+                </label>
+                <label class="field">
+                  <span>Mensaje</span>
+                  <textarea id="messageBodyInput" rows="4" placeholder="Describe que ocurrio, participante, estacion y cualquier dato util."></textarea>
+                </label>
+                <button class="button primary" type="submit">Enviar a administradores</button>
+              </form>
+              <div id="messageList" class="message-list"></div>
+            </section>
+          </section>
+
+          <section id="rubricView" class="view">
+            <section class="panel">
+              <h2>Rubrica operativa</h2>
+              <div id="rubricCards" class="rubric-grid"></div>
+            </section>
+          </section>
+        </section>
+      </main>
+
+      <div id="detailModal" class="modal-backdrop" hidden>
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+          <div class="modal-heading">
+            <div>
+              <p id="detailMeta" class="eyebrow">Detalle de evaluacion</p>
+              <h2 id="detailTitle">Participante</h2>
+            </div>
+            <button id="closeDetailBtn" class="icon-button" type="button" aria-label="Cerrar detalle">X</button>
+          </div>
+          <div id="detailBody" class="detail-body"></div>
+        </section>
+      </div>
+
+      <template id="candidateTemplate">
+        <article class="candidate-row">
+          <span class="avatar"></span>
+          <span>
+            <strong class="candidate-name"></strong>
+            <small class="candidate-meta"></small>
+          </span>
+          <em class="candidate-score"></em>
+          <button class="button secondary evaluate-button" type="button">Evaluar</button>
+        </article>
+      </template>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
